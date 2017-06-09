@@ -14,6 +14,17 @@ app.use(middleware.bodyParser.json());
 
 app.use('/project', routes.project);
 
+
+elasticClient.ping({
+  requestTimeout: 1000
+}, function (error) {
+  if (error) {
+    console.trace('Elasticsearch cluster is down!');
+  } else {
+    console.log('All is well');
+  }
+});
+// elastic.deleteIndex('project')
 let body = {
   properties: {
     title: { type: "string" },
@@ -22,36 +33,17 @@ let body = {
   }
 }
 
-// elastic.deleteIndex('project')
-if (!elastic.checkIndex('project')) {
-  elastic.initIndex('project')
-  .then(elastic.initMapping('project', body))
-}
-
-// elastic.getSuggestions('project', 'africa')
-
-
-// elasticClient.ping({
-//   // ping usually has a 3000ms timeout 
-//   requestTimeout: 1000
-// }, function (error) {
-//   if (error) {
-//     console.trace('elasticsearch cluster is down!');
-//   } else {
-//     console.log('All is well');
-//   }
-// });
-
-// if (!elastic.checkIndex(indices[0])) {
-//   elastic.initIndex(indices[0])
-// }
-
-// elastic.initMapping(indices[0], body)
-// .then(elastic.addDocument(indices[0], data))
-// .then(res => console.log(res));
-
-// elastic.getSuggestions('project', 'military')
-// .then(res => console.log(res))
+elastic.checkIndex('project')
+.then(bool => {
+  if (!bool) {
+    return elastic.initIndex('project')
+    .then(res => {
+      return elastic.initMapping('project', body)
+      .then(res => console.log('Mapped!'))
+      .catch(err => console.log('Error', err))
+    })
+  }
+})
 
 module.exports = app;
 

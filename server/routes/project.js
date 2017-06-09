@@ -9,10 +9,13 @@ router.route('/_bulk').post((req, res) => {
   .catch(err => res.status(404).send(err));
 })
 
-router.route('/suggest:input').get((req, res) => {
-  console.log('suggest', req.params.input)
-  elastic.getSuggestions('project', req.params.input).then(res => console.log('suggestres', res))
+router.route('/_suggest/:query').get((req, res) => {
+  elastic.search('project', req.params.query)
+  .then(results => {
+    let data = results.hits.hits.map(hit => hit["_id"]);
+    res.status(200).send(data)
+  })
+  .catch(err => res.status(404).send(err))
 })
-
 
 module.exports = router;
