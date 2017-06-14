@@ -5,6 +5,4 @@ const elasticClient = new elasticsearch.Client({
   log: 'trace'
 });
 
-var indexName ="projectIndex"
-
 module.exports = elasticClient;

@@ -40,7 +40,7 @@ const search = (index, query) => {
     index: index,
     body: {
       query: {
-        query_string: { 
+        query_string: {
           default_operator: "AND",
           query: query
         }

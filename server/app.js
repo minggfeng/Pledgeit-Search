@@ -5,6 +5,7 @@ const routes = require('./routes');
 const elasticClient = require('./elastic/elastic.js');
 const elastic = require('./elastic/utils.js');
 const worker = require('./worker/project.js');
+const knex = require('knex')(require('../knexfile'));
 
 const app = express();
 
@@ -25,20 +26,23 @@ elasticClient.ping({
   }
 });
 // elastic.deleteIndex('project')
-let body = {
+
+let projectMapping = {
   properties: {
-    title: { type: "string" },
-    subtitle: { type: "string" },
-    description: { type: "string" }
+    title: { type: "text", boost: "3" },
+    subtitle: { type: "text", boost: "2" },
+    description: { type: "text" }
   }
 }
 
 elastic.checkIndex('project')
 .then(bool => {
-  if (!bool) {
+  if (bool) {
+    elastic.deleteIndex('project');
+  } else if (!bool) {
     return elastic.initIndex('project')
     .then(res => {
-      return elastic.initMapping('project', body)
+      return elastic.initMapping('project', projectMapping)
       .then(res => console.log('Mapped!'))
       .catch(err => console.log('Error', err))
     })

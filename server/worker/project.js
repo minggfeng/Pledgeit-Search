@@ -2,46 +2,103 @@ const CronJob = require('cron').CronJob;
 const request = require('request');
 const elastic = require('../elastic/utils.js');
 const app = require('../app.js');
+const models = require('../../db/models');
 
-const url = `http://localhost:3000/search/projectsIndex/`;
+var lastUpdate = '2016-07-09 00:00:00-07';
+
+if (lastUpdate === '2016-07-09 00:00:00-07') {
+  let projectDocuments = [];
+  return models.Project.where('updated_at', '>', lastUpdate).fetchAll()
+  .then(projects => {
+    projects.models.map(model => {
+      let action = {
+        index: {
+          _index: 'project',
+          _type: 'document',
+          _id: model.get('id')
+        }
+      }
+
+      let doc = {
+        doc: {
+          title: model.get('title'),
+          subtitle: model.get('subtitle'),
+          description: model.get('description')
+        }
+      }
+      
+      projectDocuments.push(action);
+      projectDocuments.push(doc);
+    })
+  })
+  .then(res => {
+    if (projectDocuments.length > 0) {
+      return elastic.addBulk(projectDocuments);
+    } else {
+      return; 
+    }
+  })
+  .then(res => {
+    if (res) {
+      lastUpdate = new Date();
+      console.log('Updated project index');
+    } else {
+      console.log('Checked project index');
+    }
+  })
+  .catch(err => {
+    console.log('Error updating project index');
+  })
+}
+
+
 
 const ProjectJob = new CronJob({
-  cronTime: '*/10 * * * *', 
+  cronTime: '*/10 * * * *',
   onTick: function() {
-    request(url, (err, res, body) => {
-      let data = [];
-      JSON.parse(body).map((project, index) => {
-        
-        let action = { 
+    let projectDocuments = [];
+    return models.Project.where('updated_at', '>', lastUpdate).fetchAll()
+    .then(projects => {
+      projects.models.map(model => {
+        let action = {
           index: {
             _index: 'project',
             _type: 'document',
-            _id: project.id,
-          } 
+            _id: model.get('id')
+          }
         }
 
         let doc = {
           doc: {
-            title: project.title,
-            subtitle: project.subtitle,
-            description: project.description
+            title: model.get('title'),
+            subtitle: model.get('subtitle'),
+            description: model.get('description')
           }
         }
-
-        data.push(action);
-        data.push(doc);
-
-      })
-
-      elastic.addBulk(data)  
-      .then(res => {
-        console.log('Updated index', res)
-
-      })
-      .catch(err => {
-        console.log('Error updating index', err)
+        
+        projectDocuments.push(action);
+        projectDocuments.push(doc);
       })
     })
+    .then(res => {
+      if (projectDocuments.length > 0) {
+        return elastic.addBulk(projectDocuments);
+      } else {
+        return; 
+      }
+    })
+    .then(res => {
+      if (res) {
+        lastUpdate = new Date();
+        console.log('Updated project index');
+      } else {
+        console.log('Checked project index');
+      }
+    })
+    .catch(err => {
+      console.log('Error updating project index');
+    })
+
   },
   start: true
 })
