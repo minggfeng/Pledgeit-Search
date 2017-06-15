@@ -40,7 +40,7 @@ const search = (index, query) => {
     index: index,
     body: {
       query: {
-        query_string: { 
+        query_string: {
           default_operator: "AND",
           query: query
         }
@@ -49,7 +49,14 @@ const search = (index, query) => {
   })
 }
 
-const addBulk = (body) => {
+const addBulk = (index, body) => {
+  return elasticClient.bulk({
+    index: index,
+    body: body
+  })
+}
+
+const addBulkHandler = (body) => {
   return elasticClient.bulk({
     body: body
   })
@@ -62,3 +69,4 @@ module.exports.initMapping = initMapping;
 module.exports.addDocument = addDocument;
 module.exports.search = search;
 module.exports.addBulk = addBulk;
+module.exports.addBulkHandler = addBulkHandler;
