@@ -22,8 +22,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 1. [Usage](#usage)
 1. [Requirements](#requirements)
 1. [Development](#development)
-    1. [Installing Dependencies](#installing-dependencies)
-    1. [Tasks](#tasks)
+    1. [Installing Dependencies](##installing-dependencies)
+1. [Database Initialization](#database-initialization)
+1. [Running the App](#running-the-app)
 
 ## Usage
 
@@ -50,13 +51,6 @@ brew install yarn
 brew install postgresql
 
 See [elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html) for installation.
-
-```
-
-### Install Project Dependencies
-
-```
-yarn global add grunt-cli knex eslint
 
 ```
 
