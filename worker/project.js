@@ -6,7 +6,7 @@ const models = require('../db/models');
 var lastUpdate = '2016-07-09 00:00:00-07';
 
 const ProjectJob = new CronJob({
-  cronTime:  '*/1 * * * *',
+  cronTime:  '*/5 * * * *',
   onTick: function() {
 
     let projectDocuments = [];
